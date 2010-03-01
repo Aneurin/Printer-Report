@@ -4,7 +4,6 @@ import win32evtlogutil
 import winerror
 import re
 from sys import argv, exit
-from copy import copy
 from datetime import datetime, date, timedelta
 from docutils.core import publish_string
 from optparse import OptionParser
