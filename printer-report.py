@@ -2,7 +2,6 @@ import smtplib
 import win32evtlog
 import win32evtlogutil
 import winerror
-import active_directory
 import re
 from sys import argv, exit
 from copy import copy
@@ -275,6 +274,12 @@ parser.add_option('--no-printers', help='Don\'t generate per-printer summaries.\
 parser.add_option('-r', '--raw', help='Output raw markup. (default: %default)',
                   dest='rawOutput', action='store_true', default=False)
 options, args = parser.parse_args()
+if options.groupCounts:
+    try:
+        import active_directory
+    except ImportError:
+        print('Couldn\'t load \'active_directory\' module; disabling group summaries.')
+        options.groupCounts = False;
 
 
 def generateReport(options):
