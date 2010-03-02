@@ -265,15 +265,18 @@ parser.add_option('--mail-server', help='SMTP server to use for e-mail reports. 
 parser.add_option('--mail-from', dest='mailFrom', default='Administrator',
                   help="'From' address to use for mailed reports.\n"
                   '(default: %default)', metavar='ADDRESS')
-parser.add_option('--no-users', help='Don\'t generate per-user summaries.\n' \
-                  '(default: False)', dest='userCounts',
-                  action='store_false', default=True)
-parser.add_option('--no-groups', help='Don\'t generate per-group summaries.\n' \
-                  '(default: False)', dest='groupCounts',
-                  action='store_false', default=True)
-parser.add_option('--no-printers', help='Don\'t generate per-printer summaries.\n' \
-                  '(default: False)', dest='printerCounts',
-                  action='store_false', default=True)
+parser.add_option('--users', help='Generate per-user summaries.\n' \
+                  '(default: %default)', dest='userCounts',
+                  action='store_true', default=True)
+parser.add_option('--no-users', dest='userCounts', action='store_false')
+parser.add_option('--groups', help='Generate per-group summaries.\n' \
+                  '(default: %default)', dest='groupCounts',
+                  action='store_true', default=True)
+parser.add_option('--no-groups', dest='groupCounts', action='store_false')
+parser.add_option('--printers', help='Generate per-printer summaries.\n' \
+                  '(default: %default)', dest='printerCounts',
+                  action='store_true', default=True)
+parser.add_option('--no-printers', dest='printerCounts', action='store_false')
 parser.add_option('-r', '--raw', help='Output raw markup. (default: %default)',
                   dest='rawOutput', action='store_true', default=False)
 options, args = parser.parse_args()
