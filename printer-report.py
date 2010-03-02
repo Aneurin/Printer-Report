@@ -5,7 +5,6 @@ import winerror
 import re
 from sys import argv, exit
 from datetime import datetime, date, timedelta
-from docutils.core import publish_string
 from optparse import OptionParser
 
 class Record:
@@ -211,18 +210,23 @@ def makeTitle(subject):
     titleUnderline = '=' * (len(subject) + 2)
     return '%s\n %s\n%s' % (titleUnderline, subject, titleUnderline)
 
-def createHTMLMail (mailFrom, mailTo, html, text, subject):
-    from email.mime.multipart import MIMEMultipart
+def createMail (mailFrom, mailTo, html, text, subject):
     from email.mime.text import MIMEText
+    if html:
+        from email.mime.multipart import MIMEMultipart
 
-    message = MIMEMultipart('alternative')
-    message['Subject'] = subject
-    message['From'] = mailFrom
-    message['To'] = ','.join(mailTo)
+        message = MIMEMultipart('alternative')
+        message['Subject'] = subject
+        message['From'] = mailFrom
+        message['To'] = ','.join(mailTo)
 
-    message.attach(MIMEText(text, 'plain'))
-    message.attach(MIMEText(html, 'html'))
-
+        message.attach(MIMEText(text, 'plain'))
+        message.attach(MIMEText(html, 'html'))
+    else:
+        message = MIMEText(text, 'plain')
+        message['Subject'] = subject
+        message['From'] = mailFrom
+        message['To'] = ','.join(mailTo)
     return message.as_string()
 
 parser = OptionParser()
@@ -413,8 +417,13 @@ if options.stdout or not options.mailTo:
     print mailText
 
 if options.mailTo:
-    mailHtml = publish_string(source = mailBody, writer_name = 'html')
-    mailMessage = createHTMLMail(options.mailFrom, options.mailTo, mailHtml, mailText, mailSubject)
+    try:
+        from docutils.core import publish_string
+        mailHtml = publish_string(source = mailBody, writer_name = 'html')
+    except ImportError:
+        print('Couldn\'t load \'docutils\' module; disabling HTML e-mail.')
+        mailHtml = None
+    mailMessage = createMail(options.mailFrom, options.mailTo, mailHtml, mailText, mailSubject)
     mailServer = smtplib.SMTP(options.mailServerName)
     mailServer.sendmail(options.mailFrom, options.mailTo, mailMessage)
     mailServer.quit()
