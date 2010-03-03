@@ -256,18 +256,19 @@ def createMail (mailFrom, mailTo, html, text, subject):
 parser = OptionParser()
 parser.add_option('-t', '--time-period', dest='timePeriod',
                   help='The time period to summarise (default: the previous full month).\n' \
-                  'Format: YYYY[-MM[-DD]] or \'today\'.\n' \
+                  'Format: [YY]YY[-MM[-DD]] or \'today\'.\n' \
                   'Examples: \'2009\' for a full year, \'2009-01-01\' for a single day',
                   default=None)
 parser.add_option('-s', '--start-date', dest='startDate',
                   help='Start summary from the beginning of DATE.\n'
                   'Has no effect if --time-period is specified.\n' \
-                  'Format: YYYY-MM-DD', metavar='DATE', default=None)
+                  'Format: [YY]YY[-MM[-DD]]', metavar='DATE', default=None)
 parser.add_option('-e', '--end-date', dest='endDate',
                   help='Finish summary at the end of DATE.\n'
-                  'Has no effect if --time-period is specified.\n' \
+                  'Has no effect if --time-period is specified, ' \
+                  'or if there is no --start-date.\n' \
                   '(default if --start-date is specified: %default).\n' \
-                  'Format: YYYY-MM-DD', metavar='DATE', default='today')
+                  'Format: [YY]YY[-MM[-DD]]', metavar='DATE', default='today')
 parser.add_option('-p', '--print-server', dest='printServers', action='append',
                   help='Read print events from SERVER (may be specified multiple times; ' \
                   'default: \'localhost\')',
@@ -278,7 +279,8 @@ parser.add_option('-i', '--ignore-printer', dest='ignorePrinters', action='appen
 parser.add_option('-m', '--mail-to', dest='mailTo', action='append',
                   help='Send report to ADDRESS (may be specified multiple times)',
                   metavar='ADDRESS', default=None)
-parser.add_option('-d', '--details', help='Show full print log details (default: %default)',
+parser.add_option('-d', '--details', help='Show full print log details (default: %default). ' \
+                  'This option produces a list of every print job found.',
                   action='store_true', default=False)
 parser.add_option('--stdout', help='Print report to stdout ' \
                   '(default: False, unless no mail recipients are given)',
@@ -301,7 +303,8 @@ parser.add_option('--printers', help='Generate per-printer summaries.\n' \
                   '(default: %default)', dest='printerCounts',
                   action='store_true', default=True)
 parser.add_option('--no-printers', dest='printerCounts', action='store_false')
-parser.add_option('-r', '--raw', help='Output raw markup. (default: %default)',
+parser.add_option('-r', '--raw', help='Output raw markup. (default: %default). ' \
+                  'This option produces reStructuredText output.',
                   dest='rawOutput', action='store_true', default=False)
 options, args = parser.parse_args()
 if options.groupCounts:
