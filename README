@@ -1,0 +1,112 @@
+Generate printer usage summaries from Windows print servers
+
+This script queries the Windows event log on a specified server (or servers) and
+generates reports of printer usage over a specified time period. Information
+includes an overall summary (number of pages, number of jobs, etc.), and can be
+broken down according to user, Active Directory group, and printer. Optionally,
+the report may be mailed to a specified address (or addresses).
+
+Usage: python printer-report.py [options]
+
+Options:
+  -h, --help            show this help message and exit
+  -t TIMEPERIOD, --time-period=TIMEPERIOD
+                        The time period to summarise (default: the previous full
+                        month).
+                        Format: [YY]YY[-MM[-DD]] or 'today'.
+                        Examples: '2009' for a full year, '2009-01-01' for a
+                        single day
+  -s DATE, --start-date=DATE
+                        Start summary from the beginning of DATE. Has no effect
+                        if --time-period is specified.
+                        Format: [YY]YY[-MM[-DD]]
+  -e DATE, --end-date=DATE
+                        Finish summary at the end of DATE. Has no effect if
+                        --time-period is specified, or if there is no
+                        --start-date.
+                        (default if --start-date is specified: today).
+                        Format: [YY]YY[-MM[-DD]]
+  -p SERVER, --print-server=SERVER
+                        Read print events from SERVER (may be specified multiple
+                        times; default: 'localhost')
+  -i PRINTER, --ignore-printer=PRINTER
+                        Ignore jobs printed on PRINTER (may be specified
+                        multiple times)
+  -m ADDRESS, --mail-to=ADDRESS
+                        Send report to ADDRESS (may be specified multiple times)
+  -d, --details         Show full print log details (default: False)
+                        This option produces a list of every print job found.
+  --stdout              Print report to stdout (default: False, unless no mail
+                        recipients are given)
+  --mail-server=SERVER  SMTP server to use for e-mail reports. (default:
+                        localhost)
+  --mail-from=ADDRESS   'From' address to use for mailed reports. (default:
+                        Administrator)
+  --users               Generate per-user summaries. (default: True)
+  --no-users
+  --groups              Generate per-group summaries. (default: True)
+  --no-groups
+  --printers            Generate per-printer summaries. (default: True)
+  --no-printers
+  -r, --raw             Output raw markup. (default: False)
+                        This option produces reStructuredText output.
+
+Examples:
+
+python printer-reports.py
+    Report all print jobs in the last full month to stdout, including overall
+    summary, per-user -group and -printer breakdowns.
+
+python printer-reports.py --no-users --no-groups -t today -i 'Cute PDF Writer'
+    Produce overall summary of all print jobs so far today, excluding any to
+    'Cute PDF Writer', and producing a breakdown for each printer.
+
+python printer-reports.py -m user -s 10 -e 10-02
+    Mail a report to 'user' giving overall summaries and breakdowns for January
+    and February 2010.
+
+Prerequisites:
+
+Mark Hammond's pywin32 (Python for Windows extensions)[0] is required.
+
+The script should work on any version of Python from 2.3, though it has only
+been tested using 2.6.
+
+Optional:
+
+If docutils is found, e-mails will be generated using both text and HTML
+formats; otherwise they will be sent in plain text identical to the stdout
+version.
+
+The '--groups' option summarises results according to Active Directory groups.
+This uses Tim Golden's 'active_directory' module[1], which requires Python 2.4
+or later.
+
+Limitations and Known Issues:
+
+* The script reads the event log for the specified printer server(s) in order to
+  learn about print jobs. This is simple and straightforward but means that it
+  is limited to the information stored in a print event - for example it has no
+  way to know if a job is duplexed, nor how many pages were printed if a job is
+  cancelled.
+
+* In fact, it doesn't handle cancelled jobs at all, and counts them as if fully
+  printed.
+
+* Most error conditions are currently not handled gracefully. For example, if
+  a print server doesn't respond to connections to the event log then the script
+  will abort.
+
+* The option to generate group summaries queries the default Active Directory.
+  There is currently no option to alter the Active Directory query.
+
+* Doesn't support any mail options other than the choice of server, so cannot
+  make authenticated smtp connections, for example.
+
+* The code is currently a mess as a result of being written as a linear script,
+  then progressively hacked to add new features - it's been partially refactored
+  but needs more work.
+
+[0] http://starship.python.net/crew/mhammond/win32/
+[1] http://timgolden.me.uk/python/active_directory.html
+
